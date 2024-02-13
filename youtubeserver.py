@@ -8,6 +8,7 @@ import json
 youtubers = []
 users = []
 subscriptions = {}
+IP_ADDR = 'localhost'
 
 class UploadRequest:
     def __init__(self, youtuber, video_title, datetime):
@@ -31,7 +32,7 @@ def consume_user_requests():
         ch.basic_ack(delivery_tag=method.delivery_tag)
         
     
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(IP_ADDR))
     ch = connection.channel()
     ch.queue_declare(queue='q_subscription_request')
     ch.basic_consume(queue='q_subscription_request', on_message_callback=callback, auto_ack=False)
@@ -48,7 +49,7 @@ def consume_youtuber_requests():
         notify_users(message.youtuber, message.video_title)
         
     
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(IP_ADDR))
     ch = connection.channel()
     ch.queue_declare(queue='youtuber_upload_request')
     ch.basic_consume(queue='youtuber_upload_request', on_message_callback=callback, auto_ack=True)
@@ -56,7 +57,7 @@ def consume_youtuber_requests():
 
 def notify_users(youtuber, video_title):
     global subscriptions
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(IP_ADDR))
     ch = connection.channel()
     # sub_queue = ch.queue_declare(queue='', exclusive=True)
     ch.exchange_declare(exchange='ex_subscription_notifications', exchange_type='direct', durable = True)

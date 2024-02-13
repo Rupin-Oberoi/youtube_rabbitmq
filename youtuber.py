@@ -6,6 +6,8 @@ import time
 import json
 import threading
 
+IP_ADDR = 'localhost'
+
 class UploadRequest:
     def __init__(self, youtuber, video_title, datetime):
         self.youtuber = youtuber
@@ -13,7 +15,7 @@ class UploadRequest:
         self.datetime = datetime
 
 def publishVideo(youtuber, videoName):
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(IP_ADDR))
     channel = connection.channel()
     channel.queue_declare(queue = 'youtuber_upload_request')
     vid = UploadRequest(youtuber, videoName, time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()))

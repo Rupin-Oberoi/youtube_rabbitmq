@@ -5,13 +5,15 @@ import time
 import os
 import json
 
+IP_ADDR = 'localhost'
+
 def updateSubscription(mode, youtuber, username):
     
     def subscription_response_callback(frame):
         if frame.method.NAME == 'Basic.Ack':
             print('SUCCESS') 
             
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(IP_ADDR))
     channel = connection.channel()
     channel.queue_declare(queue = 'q_subscription_request')
     m1 = json.dumps({'user': username, 'youtuber': youtuber, 'subscribe': True if mode == 's' else False})
@@ -37,7 +39,7 @@ def receiveNotifications(username, justUnsubbedFrom = None):
             return
         print(f"New video from {m1['youtuber']}: {m1['video_title']}")
     
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(IP_ADDR))
     channel = connection.channel()
     channel.exchange_declare(exchange='ex_subscription_notifications', exchange_type='direct', durable = True)
     # if isnewuser:
