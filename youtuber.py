@@ -16,7 +16,7 @@ def publishVideo(youtuber, videoName):
     connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
     channel = connection.channel()
     channel.queue_declare(queue = 'youtuber_upload_request')
-    vid = UploadRequest(youtuber, videoName ,time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()))
+    vid = UploadRequest(youtuber, videoName, time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()))
     m1 = json.dumps(vid.__dict__)
     channel.basic_publish(exchange='', routing_key='youtuber_upload_request', body=m1)
     
