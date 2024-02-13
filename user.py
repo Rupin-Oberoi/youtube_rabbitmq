@@ -2,6 +2,7 @@ import pika
 import sys
 import threading
 import time
+import os
 import json
 
 def updateSubscription(mode, youtuber, username):
@@ -29,9 +30,11 @@ def updateSubscription(mode, youtuber, username):
     
     connection.close()
 
-def receiveNotifications(username):
+def receiveNotifications(username, justUnsubbedFrom = None):
     def callback(ch, method, properties, body):
         m1 = json.loads(body)
+        if justUnsubbedFrom and m1['youtuber'] == justUnsubbedFrom:
+            return
         print(f"New video from {m1['youtuber']}: {m1['video_title']}")
     
     connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
@@ -51,28 +54,38 @@ def receiveNotifications(username):
 
 if __name__ == '__main__':
     args = sys.argv
-    
-    if len(args) == 2:
-        username = args[1]
-        print(f'Hello {username}!')
-        print(f'Here are the latest videos from your subscriptions:')
-        subscriptions = set()
-        receiveNotifications(username)
-        
-    elif len(args) == 4:
-        username = args[1]
-        mode = args[2]
-        if not(mode) in ['s', 'u']:
-            raise ValueError('Invalid option: use s for subscribe and u for unsubscribe')
-        youtuber = args[3]
-        
-        updateSubscription(mode, youtuber, username)
-        
-        time.sleep(1)
-        print(f'Hello {username}!')
-        print(f'Here are the latest videos from your subscriptions:')
-        receiveNotifications(username)
-        
-    else:
-        print("Usage: user.py <username> or user.py <username> <mode> <youtuber>")
-        sys.exit(1)
+    try:
+        if len(args) == 2:
+            username = args[1]
+            print(f'Hello {username}!')
+            print(f'Here are the latest videos from your subscriptions:')
+            subscriptions = set()
+            receiveNotifications(username)
+            
+        elif len(args) == 4:
+            username = args[1]
+            mode = args[2]
+            if not(mode) in ['s', 'u']:
+                raise ValueError('Invalid option: use s for subscribe and u for unsubscribe')
+            youtuber = args[3]
+            
+            updateSubscription(mode, youtuber, username)
+            
+            time.sleep(1)
+            print(f'Hello {username}!')
+            print(f'Here are the latest videos from your subscriptions:')
+            if mode == 's':
+                receiveNotifications(username)
+            elif mode == 'u':
+                receiveNotifications(username, youtuber)
+            
+        else:
+            print("Usage: user.py <username> or user.py <username> <mode> <youtuber>")
+            sys.exit(1)
+            
+    except KeyboardInterrupt:
+        print('Interrupted')
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
