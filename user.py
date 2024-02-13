@@ -14,8 +14,8 @@ def updateSubscription(mode, youtuber, username):
     channel = connection.channel()
     channel.queue_declare(queue = 'q_subscription_request')
     m1 = json.dumps({'user': username, 'youtuber': youtuber, 'subscribe': True if mode == 's' else False})
-    # channel.confirm_delivery()
-    # channel.add_on_return_callback(subscription_response_callback)
+    channel.confirm_delivery()
+    channel.add_on_return_callback(subscription_response_callback)
     channel.basic_publish(exchange='', routing_key='q_subscription_request', body=m1)
     
     

@@ -19,21 +19,22 @@ def consume_user_requests():
     def callback(ch, method, properties, body):
         m1 = json.loads(body)
         if m1['subscribe']:
-            subscriptions[m1['youtuber']].add(m1['user'])
+            # subscriptions[m1['youtuber']].add(m1['user'])
             print(f"User {m1['user']} has subscribed to {m1['youtuber']}")
             # ch.queue_declare(queue='subscription_request_response')
             # ch.basic_publish(exchange='', routing_key='subscription_request_response', body='SUCCESS')
         else:
-            subscriptions[m1['youtuber']].remove(m1['user'])
+            # subscriptions[m1['youtuber']].remove(m1['user'])
             print(f"User {m1['user']} has unsubscribed from {m1['youtuber']}")
             # ch.queue_declare(queue='subscription_request_response')
             # ch.basic_publish(exchange='', routing_key='subscription_request_response', body='SUCCESS')
+        ch.basic_ack(delivery_tag=method.delivery_tag)
         
     
     connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
     ch = connection.channel()
     ch.queue_declare(queue='q_subscription_request')
-    ch.basic_consume(queue='q_subscription_request', on_message_callback=callback, auto_ack=True)
+    ch.basic_consume(queue='q_subscription_request', on_message_callback=callback, auto_ack=False)
     ch.start_consuming()
 
 def consume_youtuber_requests():
