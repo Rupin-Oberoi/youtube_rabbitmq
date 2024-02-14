@@ -1,25 +1,28 @@
 import pika
 import sys
-import threading
 import time
 import os
 import json
+from dotenv import load_dotenv
 
-IP_ADDR = 'localhost'
+load_dotenv(override=True)
+
+IP_ADDRESS = os.environ.get('ip_address')
+credentials = pika.PlainCredentials(os.environ.get('username'), os.environ.get('password'))
 
 def updateSubscription(mode, youtuber, username):
     
-    def subscription_response_callback(frame):
-        if frame.method.NAME == 'Basic.Ack':
-            print('SUCCESS') 
+    # def subscription_response_callback(frame):
+    #     if frame.method.NAME == 'Basic.Ack':
+    #         print('SUCCESS') 
             
-    connection = pika.BlockingConnection(pika.ConnectionParameters(IP_ADDR))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host = IP_ADDRESS, credentials=credentials))
     channel = connection.channel()
     channel.queue_declare(queue = 'q_subscription_request')
     m1 = json.dumps({'user': username, 'youtuber': youtuber, 'subscribe': True if mode == 's' else False})
-    channel.confirm_delivery()
-    channel.add_on_return_callback(subscription_response_callback)
+    # channel.confirm_delivery()
     channel.basic_publish(exchange='', routing_key='q_subscription_request', body=m1)
+    print('SUCCESS')
     
     
     q = channel.queue_declare(queue = f'q_sub_notif_{username}', exclusive=False, durable=True)
@@ -39,7 +42,7 @@ def receiveNotifications(username, justUnsubbedFrom = None):
             return
         print(f"New video from {m1['youtuber']}: {m1['video_title']}")
     
-    connection = pika.BlockingConnection(pika.ConnectionParameters(IP_ADDR))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host = IP_ADDRESS, credentials=credentials))
     channel = connection.channel()
     channel.exchange_declare(exchange='ex_subscription_notifications', exchange_type='direct', durable = True)
     # if isnewuser:

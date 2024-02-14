@@ -1,12 +1,14 @@
-import argparse
 import os
 import pika
 import sys
 import time
 import json
-import threading
+from dotenv import load_dotenv
 
-IP_ADDR = 'localhost'
+load_dotenv(override=True)
+
+IP_ADDRESS = os.environ.get('ip_address')
+credentials = pika.PlainCredentials(os.environ.get('username'), os.environ.get('password'))
 
 class UploadRequest:
     def __init__(self, youtuber, video_title, datetime):
@@ -15,13 +17,14 @@ class UploadRequest:
         self.datetime = datetime
 
 def publishVideo(youtuber, videoName):
-    connection = pika.BlockingConnection(pika.ConnectionParameters(IP_ADDR))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(IP_ADDRESS, credentials=credentials))
     channel = connection.channel()
-    channel.queue_declare(queue = 'youtuber_upload_request')
+    # channel.confirm_delivery()
+    channel.queue_declare(queue = 'q_youtuber_upload_request')
     vid = UploadRequest(youtuber, videoName, time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()))
     m1 = json.dumps(vid.__dict__)
-    channel.basic_publish(exchange='', routing_key='youtuber_upload_request', body=m1)
-    
+    channel.basic_publish(exchange='', routing_key='q_youtuber_upload_request', body=m1)
+    print('SUCCESS')
     
 
 def main():
