@@ -22,6 +22,8 @@ def updateSubscription(mode, youtuber, username):
     m1 = json.dumps({'user': username, 'youtuber': youtuber, 'subscribe': True if mode == 's' else False})
     # channel.confirm_delivery()
     channel.basic_publish(exchange='', routing_key='q_subscription_request', body=m1)
+    if youtuber is None:
+        return
     print('SUCCESS')
     
     
@@ -65,6 +67,7 @@ if __name__ == '__main__':
             print(f'Hello {username}!')
             print(f'Here are the latest videos from your subscriptions:')
             subscriptions = set()
+            updateSubscription(None, None, username)
             receiveNotifications(username)
             
         elif len(args) == 4:

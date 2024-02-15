@@ -23,16 +23,19 @@ class UploadRequest:
 def consume_user_requests():
     def callback(ch, method, properties, body):
         m1 = json.loads(body)
-        if m1['subscribe']:
-            # subscriptions[m1['youtuber']].add(m1['user'])
-            print(f"User {m1['user']} has subscribed to {m1['youtuber']}")
-            # ch.queue_declare(queue='subscription_request_response')
-            # ch.basic_publish(exchange='', routing_key='subscription_request_response', body='SUCCESS')
+        if not(m1['youtuber'] is None):
+            if m1['subscribe']:
+                # subscriptions[m1['youtuber']].add(m1['user'])
+                print(f"User {m1['user']} has subscribed to {m1['youtuber']}")
+                # ch.queue_declare(queue='subscription_request_response')
+                # ch.basic_publish(exchange='', routing_key='subscription_request_response', body='SUCCESS')
+            else:
+                # subscriptions[m1['youtuber']].remove(m1['user'])
+                print(f"User {m1['user']} has unsubscribed from {m1['youtuber']}")
+                # ch.queue_declare(queue='subscription_request_response')
+                # ch.basic_publish(exchange='', routing_key='subscription_request_response', body='SUCCESS')
         else:
-            # subscriptions[m1['youtuber']].remove(m1['user'])
-            print(f"User {m1['user']} has unsubscribed from {m1['youtuber']}")
-            # ch.queue_declare(queue='subscription_request_response')
-            # ch.basic_publish(exchange='', routing_key='subscription_request_response', body='SUCCESS')
+            print(f"User {m1['user']} has logged in")
         #ch.basic_ack(delivery_tag=method.delivery_tag)
         
     
