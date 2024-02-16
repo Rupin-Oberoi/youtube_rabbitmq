@@ -11,6 +11,7 @@ load_dotenv(override=True)
 youtubers = []
 users = []
 subscriptions = {}
+videos = {}
 IP_ADDRESS = os.environ.get('ip_address')
 credentials = pika.PlainCredentials(os.environ.get('username'), os.environ.get('password'))
 
@@ -23,15 +24,23 @@ class UploadRequest:
 def consume_user_requests():
     def callback(ch, method, properties, body):
         m1 = json.loads(body)
+        if m1['user'] not in users:
+            users.append(m1['user'])
+            subscriptions[m1['user']] = set()
         if not(m1['youtuber'] is None):
             if m1['subscribe']:
                 # subscriptions[m1['youtuber']].add(m1['user'])
                 print(f"{m1['user']} subscribed to {m1['youtuber']}")
+                subscriptions[m1['user']].add(m1['youtuber'])
                 # ch.queue_declare(queue='subscription_request_response')
                 # ch.basic_publish(exchange='', routing_key='subscription_request_response', body='SUCCESS')
             else:
                 # subscriptions[m1['youtuber']].remove(m1['user'])
                 print(f"{m1['user']} unsubscribed from {m1['youtuber']}")
+                try:
+                    subscriptions[m1['user']].remove(m1['youtuber'])
+                except:
+                    pass
                 # ch.queue_declare(queue='subscription_request_response')
                 # ch.basic_publish(exchange='', routing_key='subscription_request_response', body='SUCCESS')
         else:
@@ -51,8 +60,10 @@ def consume_youtuber_requests():
         print(f"{message.youtuber} uploaded {message.video_title}")
         global youtubers
         if message.youtuber not in youtubers:
-            youtubers.append(body)
-            subscriptions[message.youtuber] = set()
+            youtubers.append(message.youtuber)
+            videos[message.youtuber] = [message.video_title]
+        else:
+            videos[message.youtuber].append(message.video_title)        
         t_notify = threading.Thread(target=notify_users, args=(message.youtuber, message.video_title))
         t_notify.daemon = True
         t_notify.start()
