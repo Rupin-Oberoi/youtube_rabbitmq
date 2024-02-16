@@ -42,7 +42,7 @@ def receiveNotifications(username, justUnsubbedFrom = None):
         m1 = json.loads(body)
         if justUnsubbedFrom and m1['youtuber'] == justUnsubbedFrom:
             return
-        print(f"New video from {m1['youtuber']}: {m1['video_title']}")
+        print(f"New Notification: {m1['youtuber']} uploaded {m1['video_title']}")
     
     connection = pika.BlockingConnection(pika.ConnectionParameters(host = IP_ADDRESS, credentials=credentials))
     channel = connection.channel()
@@ -64,8 +64,8 @@ if __name__ == '__main__':
     try:
         if len(args) == 2:
             username = args[1]
-            print(f'Hello {username}!')
-            print(f'Here are the latest videos from your subscriptions:')
+            #print(f'Hello {username}!')
+            #print(f'Here are the latest videos from your subscriptions:')
             subscriptions = set()
             updateSubscription(None, None, username)
             receiveNotifications(username)
@@ -80,15 +80,15 @@ if __name__ == '__main__':
             updateSubscription(mode, youtuber, username)
             
             time.sleep(1)
-            print(f'Hello {username}!')
-            print(f'Here are the latest videos from your subscriptions:')
+            #print(f'Hello {username}!')
+            #print(f'Here are the latest videos from your subscriptions:')
             if mode == 's':
                 receiveNotifications(username)
             elif mode == 'u':
                 receiveNotifications(username, youtuber)
             
         else:
-            print("Usage: user.py <username> or user.py <username> <mode> <youtuber>")
+            print("Valid Usage: user.py <username> or user.py <username> <mode> <youtuber>")
             sys.exit(1)
             
     except KeyboardInterrupt:

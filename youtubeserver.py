@@ -26,16 +26,16 @@ def consume_user_requests():
         if not(m1['youtuber'] is None):
             if m1['subscribe']:
                 # subscriptions[m1['youtuber']].add(m1['user'])
-                print(f"User {m1['user']} has subscribed to {m1['youtuber']}")
+                print(f"{m1['user']} subscribed to {m1['youtuber']}")
                 # ch.queue_declare(queue='subscription_request_response')
                 # ch.basic_publish(exchange='', routing_key='subscription_request_response', body='SUCCESS')
             else:
                 # subscriptions[m1['youtuber']].remove(m1['user'])
-                print(f"User {m1['user']} has unsubscribed from {m1['youtuber']}")
+                print(f"{m1['user']} unsubscribed from {m1['youtuber']}")
                 # ch.queue_declare(queue='subscription_request_response')
                 # ch.basic_publish(exchange='', routing_key='subscription_request_response', body='SUCCESS')
         else:
-            print(f"User {m1['user']} has logged in")
+            print(f"{m1['user']} logged in")
         #ch.basic_ack(delivery_tag=method.delivery_tag)
         
     
@@ -48,7 +48,7 @@ def consume_user_requests():
 def consume_youtuber_requests():
     def callback(ch, method, properties, body):
         message = UploadRequest(**json.loads(body))
-        print(f"Youtuber {message.youtuber} has uploaded a new video titled {message.video_title} at {message.datetime}")
+        print(f"{message.youtuber} uploaded {message.video_title}")
         global youtubers
         if message.youtuber not in youtubers:
             youtubers.append(body)

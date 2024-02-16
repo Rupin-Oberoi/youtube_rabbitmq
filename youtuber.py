@@ -31,7 +31,7 @@ def main():
     args = sys.argv
     
     if len(args) < 3:
-        print("Usage: youtuber.py <youtuber_name> <video_name>")
+        print("Valid Usage: youtuber.py <youtuber_name> <video_name>")
         sys.exit(1)
         
     youtuber_name = args[1]
